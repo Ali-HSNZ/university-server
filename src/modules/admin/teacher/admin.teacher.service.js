@@ -11,6 +11,7 @@ class AdminTeacherService {
     }
 
     async create(teacherDTO) {
+        // all req.body data
         const {
             first_name,
             last_name,
@@ -22,10 +23,12 @@ class AdminTeacherService {
             address,
         } = teacherDTO
 
+        // create uniq teacher code with uuid v4
         const teacherCode = (
             uuidv4().match(/-(\w+-\w+)/)[0] + uuidv4().match(/-(\w+-\w+)/)[1]
         ).replaceAll(/-/g, '')
 
+        // insert teacher DB query
         const result = await this.#queries.create({
             first_name,
             last_name,
@@ -58,6 +61,11 @@ class AdminTeacherService {
             return { ['mobile']: AdminTeacherMessages.ExistMobile }
 
         return false
+    }
+
+    async allTeachers() {
+        // get teachers along with class_count DB query
+        return await this.#queries.allTeacher()
     }
 }
 

@@ -10,7 +10,7 @@ router.post(
     checkValidation,
     adminTeacherController.create
 )
-router.get('/all-class', adminTeacherController.allClass)
+router.get('/teachers/list', adminTeacherController.allTeachers)
 router.post('/assignment-class', adminTeacherController.assignmentClass)
 router.delete('/delete-class', adminTeacherController.deleteClass)
 router.put('/edit-profile', adminTeacherController.editProfile)

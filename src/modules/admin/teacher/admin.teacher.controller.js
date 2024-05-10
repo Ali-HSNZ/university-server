@@ -41,10 +41,22 @@ class AdminTeacherController {
         }
     }
 
+    async allTeachers(req, res, next) {
+        try {
+            const teachers = await this.#service.allTeachers()
+            res.status(200).json({
+                code: 200,
+                message: AdminTeacherMessages.TeacherListSuccessfully,
+                data: teachers.recordset,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
     async editProfile() {}
     async assignmentClass() {}
     async assignmentClass() {}
-    async allClass() {}
     async deleteClass() {}
 }
 

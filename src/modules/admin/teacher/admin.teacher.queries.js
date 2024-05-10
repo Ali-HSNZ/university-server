@@ -57,6 +57,19 @@ class AdminTeacherQueries {
             )`
         )
     }
+
+    // Query to retrieve teachers with class_count
+    async allTeacher() {
+        return await sql.query(`
+            SELECT u.userId AS userId, u.first_name, u.last_name, u.code, u.national_code, COUNT(c.userId) AS class_count
+            FROM [user] u
+            LEFT JOIN class c ON u.userId = c.userId
+            WHERE NOT EXISTS (
+                SELECT 1 FROM [user] u2 WHERE u2.userId = u.userId AND u2.type = 1
+            )
+            GROUP BY u.userId, u.first_name, u.last_name, u.code, u.national_code
+        `)
+    }
 }
 
 module.exports = new AdminTeacherQueries()
