@@ -1,7 +1,6 @@
 const autoBind = require('auto-bind')
 const sql = require('mssql/msnodesqlv8')
 const mssqlConfig = require('../../config/mssql.config')
-const createHttpError = require('http-errors')
 
 class AuthQueries {
     constructor() {
