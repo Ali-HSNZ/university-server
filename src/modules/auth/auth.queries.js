@@ -10,17 +10,17 @@ class AuthQueries {
     }
 
     async connectDB() {
-        await sql.connect(mssqlConfig)
+        sql.connect(mssqlConfig).catch((err) => err)
     }
 
     async findUserQuery(national_code, pass) {
         return await sql.query(
-            `select * from teacher where national_code = ${national_code} and pass = '${pass}'`
+            `select * from [user] where national_code = ${national_code} and pass = '${pass}'`
         )
     }
-    async createUser() {
+    async signUserToken(token, national_code) {
         return await sql.query(
-            `insert into teacher (national_code, pass,type) values (4990211162,3rvdvdfv,1)`
+            `update [user] set token = '${token}' where national_code = ${national_code} `
         )
     }
 }

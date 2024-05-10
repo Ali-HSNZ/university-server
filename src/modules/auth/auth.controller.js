@@ -12,21 +12,18 @@ class AuthController {
     }
     async login(req, res, next) {
         try {
-            const { national_code, password } = req.body
-            const user = await this.#service.isExistUser(national_code, password)
-            if (!user) {
-                res.status(404).send({
-                    code: 404,
-                    data: null,
-                    message: AuthMessage.NotFound,
-                })
-            } else {
-                res.send({
-                    code: 404,
-                    data: null,
-                    message: 'کاربر یافت نشد',
-                })
-            }
+            const { national_code, pass } = req.body
+
+            const user = await this.#service.login(national_code, pass)
+
+            return res.status(200).json({
+                message: AuthMessage.LoginSuccessfully,
+                code: 200,
+                data: {
+                    token: user.token,
+                    userType: !user.type || user.type === 0 ? 'teacher' : 'admin',
+                },
+            })
         } catch (error) {
             next(error)
         }

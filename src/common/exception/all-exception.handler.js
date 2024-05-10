@@ -1,13 +1,12 @@
 const AllExceptionHandler = (app) => {
     app.use((err, req, res, next) => {
-        let status = err?.status ?? err.statusCode ?? err.code
+        const status = err?.status || 500
+        const message = err?.message || 'InternalServerError'
 
-        if (!status || isNaN(+status) || status > 511 || status < 200) {
-            status = 500
-        }
-
-        res.status(status).json({
-            message: err?.message ?? err?.stack ?? 'InternalServerError',
+        return res.status(status).json({
+            code: status,
+            invalidParams: err?.error,
+            message: message,
         })
     })
 }

@@ -8,8 +8,6 @@ module.exports = (req, res, next) => {
         obj[e.path] = e.msg
     })
 
-    console.log(obj)
-
     if (Object.keys(obj).length > 0) {
         res.status(400).json({
             status: 400,

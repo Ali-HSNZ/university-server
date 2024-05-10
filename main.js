@@ -13,19 +13,13 @@ const main = async () => {
     const app = express()
     const port = process.env.PORT
 
-    // config mongoDB
-    // require('./src/config/mongoose.config')
-
     // config app and Routes
     app.use(cors())
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
-    app.use(cookieParser(process.env.COOKIE_SECRET_KEY))
+    app.use(cookieParser())
     app.use(morgan('dev'))
     app.use(mainRouter)
-
-    // config swagger
-    // swaggerConfig(app)
 
     // Error Handlers
     NotFoundHandler(app)
