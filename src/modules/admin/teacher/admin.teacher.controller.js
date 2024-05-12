@@ -54,10 +54,43 @@ class AdminTeacherController {
         }
     }
 
+    async classList(req, res, next) {
+        try {
+            const teacherCode = req.params.id
+            const result = await this.#service.teacherClassList(teacherCode)
+            res.status(200).json({
+                code: 200,
+                message: AdminTeacherMessages.TeacherClassesListSuccessfully,
+                data: result,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+    async deleteClass(req, res, next) {
+        try {
+            const { teacherCode, classId } = req.params
+
+            const result = await this.#service.deleteClassByTeacherCode(teacherCode, classId)
+
+            if (result.rowsAffected[0] >= 1)
+                return res.status(200).json({
+                    code: 200,
+                    message: AdminTeacherMessages.TeacherClassDeletedSuccessfully,
+                    result,
+                })
+
+            throw {
+                code: 500,
+                message: AdminTeacherMessages.TeacherClassDeletedFailed,
+            }
+        } catch (error) {
+            next(error)
+        }
+    }
+
     async editProfile() {}
     async assignmentClass() {}
-    async assignmentClass() {}
-    async deleteClass() {}
 }
 
 module.exports = {

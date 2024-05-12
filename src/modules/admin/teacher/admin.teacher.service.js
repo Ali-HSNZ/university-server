@@ -67,6 +67,20 @@ class AdminTeacherService {
         // get teachers along with class_count DB query
         return await this.#queries.allTeacher()
     }
+
+    async teacherClassList(teacherCode) {
+        const classesList = (await this.#queries.teacherClassList(teacherCode)).recordset
+        const teacher = (await this.#queries.isExistTeacherByCode(teacherCode)).recordset[0]
+
+        return {
+            classes: classesList,
+            teacher,
+        }
+    }
+
+    async deleteClassByTeacherCode(teacherCode, classId) {
+        return await this.#queries.deleteClassByTeacherCode(teacherCode, classId)
+    }
 }
 
 module.exports = {
