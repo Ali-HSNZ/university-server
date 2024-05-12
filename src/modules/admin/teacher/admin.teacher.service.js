@@ -1,8 +1,7 @@
 const autoBind = require('auto-bind')
 const adminTeacherQueries = require('./admin.teacher.queries')
 const { AdminTeacherMessages } = require('./admin.teacher.messages')
-const { hashString } = require('../../../utils/hash-string')
-const { v4: uuidv4 } = require('uuid')
+const { generateUniqueCode } = require('../../../utils/generate-unique-code')
 class AdminTeacherService {
     #queries
     constructor() {
@@ -23,10 +22,17 @@ class AdminTeacherService {
             address,
         } = teacherDTO
 
-        // create uniq teacher code with uuid v4
-        const teacherCode = (
-            uuidv4().match(/-(\w+-\w+)/)[0] + uuidv4().match(/-(\w+-\w+)/)[1]
-        ).replaceAll(/-/g, '')
+        let teacherCode = generateUniqueCode()
+        let isUnique = false
+
+        // check uniq code
+        while (!isUnique) {
+            teacherCode = generateUniqueCode()
+            const existingRecord = await this.#queries.isExistTeacherByCode(teacherCode)
+            if (existingRecord.recordset.length === 0) {
+                isUnique = true
+            }
+        }
 
         // insert teacher DB query
         const result = await this.#queries.create({
@@ -66,6 +72,10 @@ class AdminTeacherService {
     async allTeachers() {
         // get teachers along with class_count DB query
         return await this.#queries.allTeacher()
+    }
+
+    async deleteTeacherByCode(code) {
+        return await this.#queries.deleteTeacherByCode(code)
     }
 
     async teacherClassList(teacherCode) {

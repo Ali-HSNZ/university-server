@@ -13,6 +13,7 @@ router.post(
 router.get('/teachers/list', adminTeacherController.allTeachers)
 router.get('/:id/class/list', adminTeacherController.classList)
 router.delete('/:teacherCode/class/:classId', adminTeacherController.deleteClass)
+router.delete('/:teacherCode/delete', adminTeacherController.delete)
 
 router.post('/assignment-class', adminTeacherController.assignmentClass)
 router.delete('/delete-class', adminTeacherController.deleteClass)

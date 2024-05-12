@@ -21,6 +21,7 @@ class AdminTeacherQueries {
     async isExistTeacherByMobile(mobile) {
         return await sql.query(`select * from [user] where mobile = '${mobile}'`)
     }
+
     filedConvertor = (tableName = '', filed = []) => {
         let result = ''
         filed.forEach((item) => {
@@ -76,24 +77,6 @@ class AdminTeacherQueries {
 
     // Query to retrieve teachers with class_count
     async allTeacher() {
-        // return await sql.query(`
-        //     SELECT u.userId AS userId,
-        //         u.first_name,
-        //         u.last_name,
-        //         u.code,
-        //         u.national_code,
-        //         COUNT(c.userId) AS class_count
-        //     FROM [user] u
-        //     LEFT JOIN class c ON u.userId = c.userId
-        //     WHERE NOT EXISTS (
-        //         SELECT 1 FROM [user] u2 WHERE u2.userId = u.userId AND u2.type = 1
-        //     )
-        //     GROUP BY u.userId,
-        //         u.first_name,
-        //         u.last_name,
-        //         u.code,
-        //         u.national_code
-        // `)
         return await sql.query(`
             SELECT
                 u.userId AS userId,
@@ -129,6 +112,10 @@ class AdminTeacherQueries {
             LEFT JOIN [user] ON [class].user_code = [user].code
             where [class].user_code = '${teacherCode}'
         `)
+    }
+
+    async deleteTeacherByCode(code) {
+        return await sql.query(`delete from [user] where code = '${code}'`)
     }
 
     async deleteClassByTeacherCode(teacherCode, class_id) {

@@ -89,6 +89,26 @@ class AdminTeacherController {
         }
     }
 
+    async delete(req, res, next) {
+        try {
+            const teacherCode = req.params.teacherCode
+            const result = await this.#service.deleteTeacherByCode(teacherCode)
+
+            if (result.rowsAffected[0] >= 1)
+                return res.status(200).json({
+                    code: 200,
+                    message: AdminTeacherMessages.DeleteTeacherSuccessfully,
+                    result,
+                })
+
+            throw {
+                code: 500,
+                message: AdminTeacherMessages.DeleteTeacherFailed,
+            }
+        } catch (error) {
+            next(error)
+        }
+    }
     async editProfile() {}
     async assignmentClass() {}
 }
