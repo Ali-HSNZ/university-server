@@ -1,12 +1,12 @@
 const autoBind = require('auto-bind')
-const adminLessonService = require('./admin.lesson.service')
+const { AdminLessonService } = require('./admin.lesson.service')
 const { AdminLessonMessages } = require('./admin.lesson.messages')
 
 class AdminLessonController {
     #service
     constructor() {
         autoBind(this)
-        this.#service = adminLessonService.AdminLessonService
+        this.#service = AdminLessonService
     }
 
     async create(req, res, next) {
@@ -53,7 +53,6 @@ class AdminLessonController {
                 return res.status(200).json({
                     code: 200,
                     message: AdminLessonMessages.DeleteLessonSuccessfully,
-                    result,
                 })
 
             throw {
