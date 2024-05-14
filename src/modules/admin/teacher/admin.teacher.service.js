@@ -2,6 +2,8 @@ const autoBind = require('auto-bind')
 const adminTeacherQueries = require('./admin.teacher.queries')
 const { AdminTeacherMessages } = require('./admin.teacher.messages')
 const { generateUniqueCode } = require('../../../utils/generate-unique-code')
+const { getDayByCode } = require('../../../utils/get-day-by-code')
+
 class AdminTeacherService {
     #queries
     constructor() {
@@ -50,6 +52,25 @@ class AdminTeacherService {
         return result
     }
 
+    async update(teacherDTO, id) {
+        // all req.body data
+        const { first_name, last_name, national_code, mobile, gender, education, address } =
+            teacherDTO
+
+        const result = await this.#queries.update({
+            first_name,
+            last_name,
+            national_code,
+            mobile,
+            gender,
+            education,
+            address,
+            id,
+        })
+
+        return result
+    }
+
     async checkExistUser(national_code, mobile) {
         // exist national_code DB query
         const availableNationalCode =
@@ -90,6 +111,53 @@ class AdminTeacherService {
 
     async deleteClassByTeacherCode(teacherCode, classId) {
         return await this.#queries.deleteClassByTeacherCode(teacherCode, classId)
+    }
+
+    async getProfile(userId) {
+        const result = await this.#queries.getProfile(userId)
+        return result.recordset[0]
+    }
+
+    // title
+    async assignmentClassTitleList() {
+        const result = await this.#queries.assignmentClassTitleList()
+        return result.recordset
+    }
+
+    // day
+    async assignmentClassDayList(lessonId) {
+        const result = await this.#queries.assignmentClassDayList(lessonId)
+        return result.recordset
+    }
+    // time
+    async assignmentClassTimeList({ lessonId, dayId }) {
+        const day = getDayByCode(dayId)
+        const result = await this.#queries.assignmentClassTimeList({ lessonId, day })
+        return result.recordset
+    }
+
+    // test
+    async assignmentClassTest({ lessonId, dayId, start_time }) {
+        const day = getDayByCode(dayId)
+        const result = await this.#queries.assignmentClassTest({
+            lessonId,
+            day,
+            start_time,
+        })
+        return result.recordset[0]
+    }
+
+    async assignmentClassToTeacher({ userId, user_code, classId, dayCode, start_time }) {
+        const day = getDayByCode(dayCode)
+        const result = await this.#queries.assignmentClassToTeacher({
+            classId,
+            day,
+            start_time,
+            userId,
+            user_code,
+        })
+
+        return result.recordset
     }
 }
 

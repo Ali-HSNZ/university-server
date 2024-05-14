@@ -21,20 +21,11 @@ class AdminTeacherQueries {
     async isExistTeacherByMobile(mobile) {
         return await sql.query(`select * from [user] where mobile = '${mobile}'`)
     }
-
-    filedConvertor = (tableName = '', filed = []) => {
-        let result = ''
-        filed.forEach((item) => {
-            result += ` ${tableName}.${item},`
-        })
-        return result.replace(/,$/, '')
-    }
     async isExistTeacherByCode(code) {
         return await sql.query(
-            `select ${this.filedConvertor('[user]', ['first_name', 'last_name', 'code as teacher_code'])} from [user] where code = '${code}'`
+            `select first_name, last_name, code as teacher_code from [user] where code = '${code}'`
         )
     }
-
     async create({
         first_name,
         last_name,
@@ -75,7 +66,34 @@ class AdminTeacherQueries {
         )
     }
 
-    // Query to retrieve teachers with class_count
+    async update({
+        first_name,
+        last_name,
+        national_code,
+        mobile,
+        birthDay,
+        gender,
+        education,
+        address,
+        id,
+    }) {
+        return await sql.query(
+            `UPDATE [user]
+                SET
+                    first_name = N'${first_name}',
+                    last_name = N'${last_name}',
+                    national_code = '${national_code}',
+                    mobile = '${mobile}',
+                    birthDay = '${birthDay}',
+                    gender = N'${gender}',
+                    education = N'${education}',
+                    address = N'${address}',
+                    pass = '${mobile}' where userId = '${id}'
+
+        `
+        )
+    }
+    // 28306941
     async allTeacher() {
         return await sql.query(`
             SELECT
@@ -113,15 +131,61 @@ class AdminTeacherQueries {
             where [class].user_code = '${teacherCode}'
         `)
     }
-
     async deleteTeacherByCode(code) {
         return await sql.query(`delete from [user] where code = '${code}'`)
     }
-
     async deleteClassByTeacherCode(teacherCode, class_id) {
+        console.log({ teacherCode, class_id })
         return await sql.query(
-            `delete from [class] where user_code = '${teacherCode}' and classId = ${class_id}`
+            `UPDATE [class]
+                SET  user_code = '' WHERE user_code = '${teacherCode}' AND classId = '${class_id}'`
         )
+    }
+
+    // Assignment Class Section =>
+    // uniq class title
+    async assignmentClassTitleList() {
+        return await sql.query(
+            `SELECT DISTINCT lessonId as value,lesson_title as label FROM [class]`
+        )
+    }
+    // class day
+    async assignmentClassDayList(lessonId) {
+        return await sql.query(`
+            select DISTINCT day from [class] where lessonId = ${lessonId}
+        `)
+    }
+
+    // class time by day
+    async assignmentClassTimeList({ lessonId, day }) {
+        return await sql.query(`
+            select start_time, end_time from [class] where lessonId = ${lessonId} and day = N'${day}'
+        `)
+    }
+
+    // class test by name, day, time
+    async assignmentClassTest({ lessonId, day, start_time }) {
+        return await sql.query(`
+            select test_date, test_time from [class] where
+                lessonId = ${lessonId} and
+                day = N'${day}' and
+                start_time = N'${start_time}'
+        `)
+    }
+    // create assignClass
+    async assignmentClassToTeacher({ userId, user_code, classId, day, start_time }) {
+        return await sql.query(`
+          UPDATE [class]
+        SET userId = ${userId}, user_code = '${user_code}'
+        WHERE
+            lessonId = '${classId}' AND
+            day = N'${day}' AND
+            start_time = N'${start_time}'
+                `)
+    }
+
+    async getProfile(userId) {
+        return await sql.query(`select * from [user] where code = ${userId}`)
     }
 }
 
