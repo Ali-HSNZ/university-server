@@ -1,7 +1,7 @@
 const autoBind = require('auto-bind')
 const { adminTeacherService } = require('./admin.teacher.service')
 const { AdminTeacherMessages } = require('./admin.teacher.messages')
-const { getDayCode } = require('../../../utils/get-code-by-day')
+const { getDayCode } = require('../../../common/utils/get-code-by-day')
 
 class AdminTeacherController {
     #service
@@ -48,19 +48,6 @@ class AdminTeacherController {
 
             // req Body Data
             const userDTO = req.body
-
-            // check exist user with national_code and mobile
-            const availableUser = await this.#service.checkExistUser(
-                userDTO.national_code,
-                userDTO.mobile
-            )
-
-            // send exist error
-            if (availableUser)
-                return res.status(400).json({
-                    code: 400,
-                    errors: availableUser,
-                })
 
             // update teacher via userDTO
             await this.#service.update(userDTO, id)

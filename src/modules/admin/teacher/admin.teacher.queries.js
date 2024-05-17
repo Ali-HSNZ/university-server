@@ -76,6 +76,7 @@ class AdminTeacherQueries {
         education,
         address,
         id,
+        pass,
     }) {
         return await sql.query(
             `UPDATE [user]
@@ -88,7 +89,7 @@ class AdminTeacherQueries {
                     gender = N'${gender}',
                     education = N'${education}',
                     address = N'${address}',
-                    pass = '${mobile}' where userId = '${id}'
+                    pass = '${pass}' where userId = '${id}'
 
         `
         )

@@ -1,4 +1,4 @@
-const { generateUniqueCode } = require('../../../utils/generate-unique-code')
+const { generateUniqueCode } = require('../../../common/utils/generate-unique-code')
 const { AdminLessonMessages } = require('./admin.lesson.messages')
 const { AdminLessonQueries } = require('./admin.lesson.queries')
 

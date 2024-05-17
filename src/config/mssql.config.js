@@ -1,6 +1,4 @@
-const sql = require('mssql/msnodesqlv8')
-
-// database configuration
+// connect database configuration
 module.exports = {
     user: '',
     password: '',

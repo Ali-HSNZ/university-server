@@ -1,8 +1,8 @@
 const autoBind = require('auto-bind')
 const adminTeacherQueries = require('./admin.teacher.queries')
 const { AdminTeacherMessages } = require('./admin.teacher.messages')
-const { generateUniqueCode } = require('../../../utils/generate-unique-code')
-const { getDayByCode } = require('../../../utils/get-day-by-code')
+const { generateUniqueCode } = require('../../../common/utils/generate-unique-code')
+const { getDayByCode } = require('../../../common/utils/get-day-by-code')
 
 class AdminTeacherService {
     #queries
@@ -54,7 +54,7 @@ class AdminTeacherService {
 
     async update(teacherDTO, id) {
         // all req.body data
-        const { first_name, last_name, national_code, mobile, gender, education, address } =
+        const { first_name, pass, last_name, national_code, mobile, gender, education, address } =
             teacherDTO
 
         const result = await this.#queries.update({
@@ -66,6 +66,7 @@ class AdminTeacherService {
             education,
             address,
             id,
+            pass,
         })
 
         return result
