@@ -4,6 +4,7 @@ const AdminLessonMessages = {
     DeleteLessonSuccessfully: 'فرایند حذف درس با موفقیت انجام شد',
     DeleteLessonFailed: 'فرایند حذف درس با خطا مواجه شد',
     AllLessons: 'لیست دروس',
+    LessonsFiles: 'لیست فایل ها',
 }
 
 module.exports = { AdminLessonMessages }

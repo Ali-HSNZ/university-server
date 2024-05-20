@@ -98,8 +98,6 @@ class AdminTeacherQueries {
     async createTeacherFile(fileDto) {
         const { first_name, last_name, user_type, section, file_path, is_show, date } = fileDto
 
-        console.log('date : ', date)
-
         return await sql.query(
             `insert into [files] (
                 first_name,

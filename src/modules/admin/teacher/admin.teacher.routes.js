@@ -1,8 +1,6 @@
 const { upload } = require('../../../common/utils/multer-upload')
 const { checkValidation } = require('../../../middlewares/check-validation')
-const {
-    createTeacherFileValidationMiddleware,
-} = require('../../../middlewares/excel-file-validation/create-teacher-file-validation')
+const { receiveExcelFile } = require('../../../middlewares/receive-excel-file')
 
 const { adminTeacherController } = require('./admin.teacher.controller')
 
@@ -23,7 +21,7 @@ router.post(
 router.post(
     '/bulk-create',
     upload.single('file'),
-    createTeacherFileValidationMiddleware,
+    receiveExcelFile,
     adminTeacherController.bulkCreate
 )
 
@@ -37,7 +35,6 @@ router.put(
 )
 
 router.get('/files/list', adminTeacherController.allFiles)
-
 
 router.get('/teachers/list', adminTeacherController.allTeachers)
 router.get('/:id/class/list', adminTeacherController.classList)

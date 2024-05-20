@@ -21,7 +21,7 @@ const main = async () => {
     app.use(morgan('dev'))
     app.use(mainRouter)
 
-    app.use(express.static(path.join(__dirname,'public')))
+    app.use(express.static(path.join(__dirname, 'public')))
 
     // Error Handlers
     NotFoundHandler(app)

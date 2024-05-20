@@ -12,6 +12,34 @@ class AdminLessonQueries {
         sql.connect(mssqlConfig).catch((err) => err)
     }
 
+    async getAllFiles() {
+        return await sql.query(`select * from [files] where section = N'درس'`)
+    }
+
+    async createLessonFile(fileDto) {
+        const { first_name, last_name, user_type, section, file_path, is_show, date } = fileDto
+
+        return await sql.query(
+            `insert into [files] (
+                first_name,
+                last_name,
+                user_type,
+                section,
+                file_path,
+                is_show,
+                date
+            ) values (
+                N'${first_name}',
+                N'${last_name}',
+                '${user_type}',
+                N'${section}',
+                '${file_path}',
+                ${is_show},
+                N'${date}'
+            )`
+        )
+    }
+
     async create({ title, type, theory_unit, practical_unit, code }) {
         return await sql.query(`
             insert into [lesson] (

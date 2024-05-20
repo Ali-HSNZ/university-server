@@ -1,9 +1,8 @@
-const { validationResult } = require('express-validator')
 const createHttpError = require('http-errors')
 
 const xlsx = require('xlsx')
 
-const createTeacherFileValidationMiddleware = (req, res, next) => {
+module.exports = (req, res, next) => {
     try {
         if (!req.file) {
             throw new createHttpError.BadRequest('فایل الزامی می باشد')
@@ -12,10 +11,6 @@ const createTeacherFileValidationMiddleware = (req, res, next) => {
         const sheetName = workBook.SheetNames[0]
 
         const data = xlsx.utils.sheet_to_json(workBook.Sheets[sheetName])
-    
-        // console.log(data)
-
-        // console.log(mapLabelsToValues(data, columns))
 
         req.body = data
         next()
@@ -23,4 +18,3 @@ const createTeacherFileValidationMiddleware = (req, res, next) => {
         next(error)
     }
 }
-module.exports = createTeacherFileValidationMiddleware

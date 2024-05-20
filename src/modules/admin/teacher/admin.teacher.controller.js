@@ -233,7 +233,7 @@ class AdminTeacherController {
             await this.#service.bulkCreate(req.body, req.user, fileUrl)
 
             return res.status(200).json({
-                message: 'استاتید با موفقیت ثبت شده اند',
+                message: 'اساتید با موفقیت ثبت شده اند',
                 code: 200,
             })
         } catch (error) {
