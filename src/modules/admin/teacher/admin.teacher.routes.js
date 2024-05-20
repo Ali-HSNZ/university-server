@@ -1,5 +1,11 @@
+const { upload } = require('../../../common/utils/multer-upload')
 const { checkValidation } = require('../../../middlewares/check-validation')
+const {
+    createTeacherFileValidationMiddleware,
+} = require('../../../middlewares/excel-file-validation/create-teacher-file-validation')
+
 const { adminTeacherController } = require('./admin.teacher.controller')
+
 const {
     adminCreateTeacherValidator,
     adminUpdateTeacherValidator,
@@ -13,6 +19,14 @@ router.post(
     checkValidation,
     adminTeacherController.create
 )
+
+router.post(
+    '/bulk-create',
+    upload.single('file'),
+    createTeacherFileValidationMiddleware,
+    adminTeacherController.bulkCreate
+)
+
 router.get('/:id/info', adminTeacherController.teacherProfile)
 
 router.put(
@@ -21,6 +35,9 @@ router.put(
     checkValidation,
     adminTeacherController.update
 )
+
+router.get('/files/list', adminTeacherController.allFiles)
+
 
 router.get('/teachers/list', adminTeacherController.allTeachers)
 router.get('/:id/class/list', adminTeacherController.classList)

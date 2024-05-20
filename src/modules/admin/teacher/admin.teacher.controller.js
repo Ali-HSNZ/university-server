@@ -1,7 +1,7 @@
 const autoBind = require('auto-bind')
 const { adminTeacherService } = require('./admin.teacher.service')
 const { AdminTeacherMessages } = require('./admin.teacher.messages')
-const { getDayCode } = require('../../../common/utils/get-code-by-day')
+const { adminCreateTeacherExcelValidator } = require('./admin.teacher.validation')
 
 class AdminTeacherController {
     #service
@@ -56,6 +56,19 @@ class AdminTeacherController {
             res.status(201).json({
                 code: 201,
                 message: AdminTeacherMessages.UpdateTeacherSuccessfully,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async allFiles(req, res, next) {
+        try {
+            const result = await this.#service.getAllFiles()
+            res.status(200).json({
+                code: 200,
+                message: AdminTeacherMessages.TeachersFiles,
+                data: result,
             })
         } catch (error) {
             next(error)
@@ -133,13 +146,12 @@ class AdminTeacherController {
 
     async createAssignmentClass(req, res, next) {
         try {
-            const { userId, user_code, classId, dayCode, start_time } = req.body
             const result = await this.#service.assignmentClassToTeacher({
-                userId,
-                user_code,
-                classId,
-                dayCode,
-                start_time,
+                userId: req.body.userId,
+                user_code: req.body.user_code,
+                classId: req.body.classId,
+                dayCode: req.body.dayCode,
+                start_time: req.body.start_time,
             })
             res.status(201).json(result)
         } catch (error) {
@@ -153,7 +165,7 @@ class AdminTeacherController {
             res.status(200).json({
                 code: 200,
                 message: AdminTeacherMessages.AssignmentClassTitleList,
-                data: result.map((e) => ({ ...e, value: e.value.toString() })),
+                data: result,
             })
         } catch (error) {
             next(error)
@@ -162,19 +174,12 @@ class AdminTeacherController {
 
     async assignmentClassDayList(req, res, next) {
         try {
-            const lessonId = req.params.id
-
-            const result = await this.#service.assignmentClassDayList(lessonId)
-
-            const formatter = result.map((e, index) => ({
-                label: e.day,
-                value: getDayCode(e.day),
-            }))
+            const result = await this.#service.assignmentClassDayList(req.params.id)
 
             res.status(200).json({
                 code: 200,
                 message: AdminTeacherMessages.AssignmentClassDayList,
-                data: formatter,
+                data: result,
             })
         } catch (error) {
             next(error)
@@ -186,15 +191,10 @@ class AdminTeacherController {
             const { lessonId, dayId } = req.params
             const result = await this.#service.assignmentClassTimeList({ lessonId, dayId })
 
-            const formatter = result.map((e, index) => ({
-                label: `از ساعت ${e.start_time} تا ${e.end_time}`,
-                value: (index + 1).toString(),
-            }))
-
             res.status(200).json({
                 code: 200,
                 message: AdminTeacherMessages.AssignmentClassTimeList,
-                data: formatter,
+                data: result,
             })
         } catch (error) {
             next(error)
@@ -210,6 +210,32 @@ class AdminTeacherController {
                 start_time,
             })
             res.json(result)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async bulkCreate(req, res, next) {
+        try {
+            const validationErrors = await this.#service.validateBulkCreateExcelFile(req)
+
+            const filePath = req?.file?.path.replace(/\\/g, '/').substring(7)
+            const fileUrl = req.protocol + '://' + req.get('host') + '/' + filePath
+
+            if (validationErrors.length >= 1) {
+                return res.status(400).json({
+                    code: 400,
+                    message: 'خطای اعتبارسنجی',
+                    errors: validationErrors[0],
+                })
+            }
+
+            await this.#service.bulkCreate(req.body, req.user, fileUrl)
+
+            return res.status(200).json({
+                message: 'استاتید با موفقیت ثبت شده اند',
+                code: 200,
+            })
         } catch (error) {
             next(error)
         }

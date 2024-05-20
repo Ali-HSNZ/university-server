@@ -1,4 +1,4 @@
-const CookieNames = require('../../common/constants/cookie.enum')
+const { cookieNames } = require('../../common/constants/cookie')
 const { AuthMessage } = require('./auth.messages')
 const authService = require('./auth.service')
 const autoBind = require('auto-bind')
@@ -31,7 +31,7 @@ class AuthController {
 
     async logout(req, res, next) {
         try {
-            return res.clearCookie(CookieNames.AccessToken).status(200).json({
+            return res.clearCookie(cookieNames.AccessToken).status(200).json({
                 message: AuthMessage.LogoutSuccessfully,
             })
         } catch (error) {

@@ -94,7 +94,37 @@ class AdminTeacherQueries {
         `
         )
     }
-    // 28306941
+
+    async createTeacherFile(fileDto) {
+        const { first_name, last_name, user_type, section, file_path, is_show, date } = fileDto
+
+        console.log('date : ', date)
+
+        return await sql.query(
+            `insert into [files] (
+                first_name,
+                last_name,
+                user_type,
+                section,
+                file_path,
+                is_show,
+                date
+            ) values (
+                N'${first_name}',
+                N'${last_name}',
+                '${user_type}',
+                N'${section}',
+                '${file_path}',
+                ${is_show},
+                N'${date}'
+            )`
+        )
+    }
+
+    async getAllFiles() {
+        return await sql.query(`select * from [files] where section = N'استاد'`)
+    }
+
     async allTeacher() {
         return await sql.query(`
             SELECT

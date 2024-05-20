@@ -13,6 +13,7 @@ const AdminTeacherMessages = {
     AssignmentClassDayList: 'لیست روز های تشکیل کلاس',
     AssignmentClassTimeList: 'لیست زمان بندی کلاس',
     TeacherProfile: 'پروفایل کاربر',
+    TeachersFiles: 'لیست فایل ها',
 }
 
 module.exports = { AdminTeacherMessages }

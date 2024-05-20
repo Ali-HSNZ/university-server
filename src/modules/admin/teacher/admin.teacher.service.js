@@ -3,12 +3,30 @@ const adminTeacherQueries = require('./admin.teacher.queries')
 const { AdminTeacherMessages } = require('./admin.teacher.messages')
 const { generateUniqueCode } = require('../../../common/utils/generate-unique-code')
 const { getDayByCode } = require('../../../common/utils/get-day-by-code')
+const { mapLabelsToValues } = require('../../../common/utils/map-labels-to-values')
+const { adminCreateTeacherExcelValidator } = require('./admin.teacher.validation')
+const createHttpError = require('http-errors')
 
 class AdminTeacherService {
     #queries
     constructor() {
         autoBind(this)
         this.#queries = adminTeacherQueries
+    }
+
+    async createUniqCode() {
+        let teacherCode = generateUniqueCode()
+        let isUnique = false
+
+        // check uniq code
+        while (!isUnique) {
+            teacherCode = generateUniqueCode()
+            const existingRecord = await this.#queries.isExistTeacherByCode(teacherCode)
+            if (existingRecord.recordset.length === 0) {
+                isUnique = true
+            }
+        }
+        return teacherCode
     }
 
     async create(teacherDTO) {
@@ -24,20 +42,11 @@ class AdminTeacherService {
             address,
         } = teacherDTO
 
-        let teacherCode = generateUniqueCode()
-        let isUnique = false
-
         // check uniq code
-        while (!isUnique) {
-            teacherCode = generateUniqueCode()
-            const existingRecord = await this.#queries.isExistTeacherByCode(teacherCode)
-            if (existingRecord.recordset.length === 0) {
-                isUnique = true
-            }
-        }
+        const teacherCode = await this.createUniqCode()
 
         // insert teacher DB query
-        const result = await this.#queries.create({
+        await this.#queries.create({
             first_name,
             last_name,
             national_code,
@@ -48,8 +57,99 @@ class AdminTeacherService {
             address,
             teacherCode,
         })
+    }
 
-        return result
+    async createTeacherFile(user, fileUrl) {
+        const currentDate = new Date()
+
+        const createFileDate =
+            currentDate.toLocaleDateString('fa-IR') +
+            ' | ' +
+            currentDate.toLocaleTimeString('fa-IR')
+
+        await this.#queries.createTeacherFile({
+            first_name: user.first_name,
+            last_name: user.last_name,
+            user_type: user.type,
+            section: 'استاد',
+            file_path: fileUrl,
+            is_show: 1,
+            date: createFileDate,
+        })
+    }
+
+    async bulkCreate(usersList, user, fileUrl) {
+        const usersDTO = this.convertExcelToValidData(usersList)
+
+        for (const user of usersDTO) {
+            const isExistTeacher = await this.checkExistUser(user.national_code, user.mobile)
+            if (isExistTeacher) {
+                if (isExistTeacher['national_code'])
+                    throw new createHttpError.BadRequest('کد ملی تکراری است')
+                else throw new createHttpError.BadRequest('شماره موبایل تکراری است')
+            }
+            await this.create({
+                first_name: user.first_name,
+                last_name: user.last_name,
+                national_code: user.national_code,
+                mobile: user.mobile,
+                birthDay: user.birthDay,
+                gender: user.gender,
+                education: user.education,
+                address: user.address,
+            })
+        }
+
+        await this.createTeacherFile(user, fileUrl)
+    }
+
+    async validateBulkCreateExcelFile(req) {
+        const errors = await Promise.all(
+            adminCreateTeacherExcelValidator.map((validation) => validation.run(req))
+        )
+
+        const errorMap = new Map()
+
+        errors.forEach((e) =>
+            e.errors.forEach((err) => {
+                if (errorMap.has(err.msg)) {
+                    const entry = errorMap.get(err.msg)
+                    const index = Number(err.path.match(/\d+/)[0]) + 1
+                    entry.path += ` , ${index}`
+                } else {
+                    const index = Number(err.path.match(/\d+/)[0]) + 1
+                    errorMap.set(err.msg, {
+                        message: err.msg,
+                        path: `ردیف ${Number(index)}`,
+                    })
+                }
+            })
+        )
+
+        const validationErrors = Array.from(errorMap.values()).filter(
+            (err) => err.message !== 'Invalid value'
+        )
+        return validationErrors
+    }
+
+    convertExcelToValidData(data) {
+        const columns = [
+            { value: 'first_name', label: 'نام' },
+            { value: 'last_name', label: 'نام خانوادگی' },
+            { value: 'national_code', label: 'کد ملی' },
+            { value: 'mobile', label: 'شماره موبایل' },
+            { value: 'birthDay', label: 'تاریخ تولد' },
+            { value: 'gender', label: 'جنسیت' },
+            { value: 'education', label: 'مدرک تحصیلی' },
+            { value: 'address', label: 'آدرس' },
+        ]
+
+        return mapLabelsToValues(data, columns)
+    }
+
+    async getAllFiles() {
+        const result = await this.#queries.getAllFiles()
+        return result.recordset
     }
 
     async update(teacherDTO, id) {
@@ -122,19 +222,31 @@ class AdminTeacherService {
     // title
     async assignmentClassTitleList() {
         const result = await this.#queries.assignmentClassTitleList()
-        return result.recordset
+        return result.recordset.map((e) => ({ ...e, value: e.value.toString() }))
     }
 
     // day
     async assignmentClassDayList(lessonId) {
         const result = await this.#queries.assignmentClassDayList(lessonId)
-        return result.recordset
+
+        const formatter = result.recordset.map((e) => ({
+            label: e.day,
+            value: getDayCode(e.day),
+        }))
+
+        return formatter
     }
     // time
     async assignmentClassTimeList({ lessonId, dayId }) {
         const day = getDayByCode(dayId)
         const result = await this.#queries.assignmentClassTimeList({ lessonId, day })
-        return result.recordset
+
+        const formatter = result.recordset.map((e, index) => ({
+            label: `از ساعت ${e.start_time} تا ${e.end_time}`,
+            value: (index + 1).toString(),
+        }))
+
+        return formatter
     }
 
     // test
