@@ -1,3 +1,4 @@
+const router = require('express').Router()
 const { upload } = require('../../../common/utils/multer-upload')
 const { checkValidation } = require('../../../middlewares/check-validation')
 const { receiveExcelFile } = require('../../../middlewares/receive-excel-file')
@@ -8,8 +9,6 @@ const {
     adminCreateTeacherValidator,
     adminUpdateTeacherValidator,
 } = require('./admin.teacher.validation')
-
-const router = require('express').Router()
 
 router.post(
     '/create',
@@ -25,7 +24,9 @@ router.post(
     adminTeacherController.bulkCreate
 )
 
-router.get('/:id/info', adminTeacherController.teacherProfile)
+router.delete('/file/:fileName/delete/:fileId', adminTeacherController.deleteFile)
+
+router.get('/:teacherCode/info', adminTeacherController.teacherProfile)
 
 router.put(
     '/:id/update',
@@ -37,7 +38,7 @@ router.put(
 router.get('/files/list', adminTeacherController.allFiles)
 
 router.get('/teachers/list', adminTeacherController.allTeachers)
-router.get('/:id/class/list', adminTeacherController.classList)
+router.get('/:teacherCode/class/list', adminTeacherController.classList)
 router.delete('/:teacherCode/class/:classId', adminTeacherController.deleteClass)
 router.delete('/:teacherCode/delete', adminTeacherController.delete)
 

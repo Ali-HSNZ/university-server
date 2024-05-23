@@ -14,6 +14,9 @@ const AdminTeacherMessages = {
     AssignmentClassTimeList: 'لیست زمان بندی کلاس',
     TeacherProfile: 'پروفایل کاربر',
     TeachersFiles: 'لیست فایل ها',
+    TeacherAssignSuccessfully: 'تخصیص کلاس با موفقیت انجام شد',
+    TeacherNotFound: 'استاد یافت نشد',
+    DeleteFileSuccessfully: 'حذف فایل با موفقیت انجام شد',
 }
 
 module.exports = { AdminTeacherMessages }

@@ -2,6 +2,9 @@ const autoBind = require('auto-bind')
 const { adminTeacherService } = require('./admin.teacher.service')
 const { AdminTeacherMessages } = require('./admin.teacher.messages')
 const { adminCreateTeacherExcelValidator } = require('./admin.teacher.validation')
+const { unlinkSync } = require('fs')
+const createHttpError = require('http-errors')
+const { findFile } = require('../../../common/utils/find-file')
 
 class AdminTeacherController {
     #service
@@ -90,7 +93,7 @@ class AdminTeacherController {
 
     async classList(req, res, next) {
         try {
-            const teacherCode = req.params.id
+            const teacherCode = req.params.teacherCode
             const result = await this.#service.teacherClassList(teacherCode)
             res.status(200).json({
                 code: 200,
@@ -146,14 +149,19 @@ class AdminTeacherController {
 
     async createAssignmentClass(req, res, next) {
         try {
-            const result = await this.#service.assignmentClassToTeacher({
-                userId: req.body.userId,
-                user_code: req.body.user_code,
-                classId: req.body.classId,
-                dayCode: req.body.dayCode,
-                start_time: req.body.start_time,
+            const { dayCode, start_time, classId, user_code } = req.body
+
+            await this.#service.assignmentClassToTeacher({
+                teacherCode: user_code,
+                classId,
+                dayCode,
+                start_time,
             })
-            res.status(201).json(result)
+
+            res.status(200).json({
+                code: 200,
+                message: AdminTeacherMessages.TeacherAssignSuccessfully,
+            })
         } catch (error) {
             next(error)
         }
@@ -215,6 +223,27 @@ class AdminTeacherController {
         }
     }
 
+    async deleteFile(req, res, next) {
+        try {
+            const { fileId, fileName } = req.params
+            const filePath = findFile(fileName)
+
+            const result = await this.#service.deleteFileByFileId(fileId)
+            if (result.rowsAffected.length === 0) {
+                throw new createHttpError.NotFound('خطا در فرایند حذف فایل')
+            }
+
+            unlinkSync(filePath)
+
+            res.status(200).json({
+                code: 200,
+                message: AdminTeacherMessages.DeleteFileSuccessfully,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
     async bulkCreate(req, res, next) {
         try {
             const validationErrors = await this.#service.validateBulkCreateExcelFile(req)
@@ -237,14 +266,16 @@ class AdminTeacherController {
                 code: 200,
             })
         } catch (error) {
+            unlinkSync(req.file.path)
             next(error)
         }
     }
 
     async teacherProfile(req, res, next) {
         try {
-            const id = req.params.id
-            const result = await this.#service.getProfile(id)
+            const teacherCode = req.params.teacherCode
+
+            const result = await this.#service.getProfile(teacherCode)
 
             res.status(200).json({
                 code: 200,

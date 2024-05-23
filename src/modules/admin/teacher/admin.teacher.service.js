@@ -6,6 +6,7 @@ const { getDayByCode } = require('../../../common/utils/get-day-by-code')
 const { mapLabelsToValues } = require('../../../common/utils/map-labels-to-values')
 const { adminCreateTeacherExcelValidator } = require('./admin.teacher.validation')
 const createHttpError = require('http-errors')
+const { getDayCode } = require('../../../common/utils/get-code-by-day')
 
 class AdminTeacherService {
     #queries
@@ -13,7 +14,9 @@ class AdminTeacherService {
         autoBind(this)
         this.#queries = adminTeacherQueries
     }
-
+    async deleteFileByFileId(fileId) {
+        return await this.#queries.deleteFileByFileId(fileId)
+    }
     async createUniqCode() {
         let teacherCode = generateUniqueCode()
         let isUnique = false
@@ -75,6 +78,7 @@ class AdminTeacherService {
             file_path: fileUrl,
             is_show: 1,
             date: createFileDate,
+            userId: user.userId,
         })
     }
 
@@ -196,25 +200,55 @@ class AdminTeacherService {
         return await this.#queries.allTeacher()
     }
 
-    async deleteTeacherByCode(code) {
-        return await this.#queries.deleteTeacherByCode(code)
+    async deleteTeacherByCode(teacherCode) {
+        const availableUser = await this.#queries.getTeacherByCode(teacherCode)
+
+        if (availableUser.recordset.length === 0) {
+            throw new createHttpError.NotFound(AdminTeacherMessages.TeacherNotFound)
+        }
+
+        const { userId } = availableUser.recordset[0]
+
+        return await this.#queries.deleteTeacherById(userId)
     }
 
     async teacherClassList(teacherCode) {
-        const classesList = (await this.#queries.teacherClassList(teacherCode)).recordset
-        const teacher = (await this.#queries.isExistTeacherByCode(teacherCode)).recordset[0]
+        const availableUser = await this.#queries.getTeacherByCode(teacherCode)
+
+        if (availableUser.recordset.length === 0) {
+            throw new createHttpError.NotFound(AdminTeacherMessages.TeacherNotFound)
+        }
+        const { userId } = availableUser.recordset[0]
+
+        const classesList = await this.#queries.teacherClassList(userId)
+        const teacher = await this.#queries.getProfile(userId)
 
         return {
-            classes: classesList,
-            teacher,
+            classes: classesList.recordset,
+            teacher: teacher.recordset[0],
         }
     }
 
     async deleteClassByTeacherCode(teacherCode, classId) {
-        return await this.#queries.deleteClassByTeacherCode(teacherCode, classId)
+        const availableUser = await this.#queries.getTeacherByCode(teacherCode)
+
+        if (availableUser.recordset.length === 0) {
+            throw new createHttpError.NotFound(AdminTeacherMessages.TeacherNotFound)
+        }
+
+        const { userId } = availableUser.recordset[0]
+
+        return await this.#queries.deleteClassByTeacherCode(userId, classId)
     }
 
-    async getProfile(userId) {
+    async getProfile(teacherCode) {
+        const availableUser = await this.#queries.getTeacherByCode(teacherCode)
+
+        if (availableUser.recordset.length === 0) {
+            throw new createHttpError.NotFound(AdminTeacherMessages.TeacherNotFound)
+        }
+
+        const { userId } = availableUser.recordset[0]
         const result = await this.#queries.getProfile(userId)
         return result.recordset[0]
     }
@@ -260,14 +294,22 @@ class AdminTeacherService {
         return result.recordset[0]
     }
 
-    async assignmentClassToTeacher({ userId, user_code, classId, dayCode, start_time }) {
+    async assignmentClassToTeacher({ teacherCode, classId, dayCode, start_time }) {
         const day = getDayByCode(dayCode)
+
+        const availableUser = await this.#queries.getTeacherByCode(teacherCode)
+
+        if (availableUser.recordset.length === 0) {
+            throw new createHttpError.NotFound(AdminTeacherMessages.TeacherNotFound)
+        }
+
+        const { userId } = availableUser.recordset[0]
+
         const result = await this.#queries.assignmentClassToTeacher({
             classId,
             day,
             start_time,
             userId,
-            user_code,
         })
 
         return result.recordset

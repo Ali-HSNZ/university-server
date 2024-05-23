@@ -18,14 +18,16 @@ class AdminTeacherQueries {
     async isExistTeacherByMobile(mobile) {
         return await sql.query(`select * from [user] where mobile = '${mobile}'`)
     }
-    async isExistTeacherByMobile(mobile) {
-        return await sql.query(`select * from [user] where mobile = '${mobile}'`)
-    }
     async isExistTeacherByCode(code) {
         return await sql.query(
-            `select first_name, last_name, code as teacher_code from [user] where code = '${code}'`
+            `select first_name, last_name, userId, code as teacher_code from [user] where code = '${code}'`
         )
     }
+
+    async getTeacherByCode(code) {
+        return await sql.query(`select * from [user] where code = '${code}'`)
+    }
+
     async create({
         first_name,
         last_name,
@@ -96,7 +98,8 @@ class AdminTeacherQueries {
     }
 
     async createTeacherFile(fileDto) {
-        const { first_name, last_name, user_type, section, file_path, is_show, date } = fileDto
+        const { first_name, last_name, user_type, section, file_path, is_show, date, userId } =
+            fileDto
 
         return await sql.query(
             `insert into [files] (
@@ -106,7 +109,8 @@ class AdminTeacherQueries {
                 section,
                 file_path,
                 is_show,
-                date
+                date,
+                userId
             ) values (
                 N'${first_name}',
                 N'${last_name}',
@@ -114,39 +118,55 @@ class AdminTeacherQueries {
                 N'${section}',
                 '${file_path}',
                 ${is_show},
-                N'${date}'
+                N'${date}',
+                '${userId}'
             )`
         )
     }
-
+    async deleteFileByFileId(fileId) {
+        return await sql.query(`delete from [files] where id = ${fileId}`)
+    }
     async getAllFiles() {
-        return await sql.query(`select * from [files] where section = N'استاد'`)
+        return await sql.query(`
+            SELECT
+                f.first_name,
+                f.last_name,
+                f.file_path,
+                f.date,
+                f.id as fileId,
+                u.code as user_code
+            FROM
+                [files] f
+            JOIN
+                [user] u ON f.userId = u.userId
+            WHERE
+                f.section = N'استاد' AND f.is_show = 1
+        `)
     }
 
     async allTeacher() {
         return await sql.query(`
             SELECT
-                u.userId AS userId,
                 u.first_name,
                 u.last_name,
                 u.code,
                 u.national_code,
-                COUNT(c.user_code) AS class_count
+                COUNT(c.userId) AS class_count
             FROM
                 [user] u
             LEFT JOIN
-                class c ON u.code = c.user_code
+                class c ON u.userId = c.userId
             WHERE
                 NOT EXISTS (SELECT 1 FROM [user] u2 WHERE u2.userId = u.userId AND u2.type = 1)
             GROUP BY
-                u.userId,
                 u.first_name,
                 u.last_name,
                 u.code,
                 u.national_code;
     `)
     }
-    async teacherClassList(teacherCode) {
+
+    async teacherClassList(teacherId) {
         return await sql.query(`
             SELECT [class].classId as id,
                 [class].lesson_title as title,
@@ -156,18 +176,22 @@ class AdminTeacherQueries {
                 [class].test_date,
                 [class].test_time
             FROM class
-            LEFT JOIN [user] ON [class].user_code = [user].code
-            where [class].user_code = '${teacherCode}'
+            LEFT JOIN [user] ON [class].userId = [user].userId
+            where [class].userId = '${teacherId}'
         `)
     }
-    async deleteTeacherByCode(code) {
-        return await sql.query(`delete from [user] where code = '${code}'`)
+    async deleteTeacherById(userId) {
+        return await sql.query(`
+            BEGIN TRANSACTION;
+                UPDATE [class] SET userId = NULL WHERE userId = '${userId}';
+                DELETE FROM [user] WHERE userId = '${userId}';
+            COMMIT;
+        `)
     }
-    async deleteClassByTeacherCode(teacherCode, class_id) {
-        console.log({ teacherCode, class_id })
+    async deleteClassByTeacherCode(userId, class_id) {
         return await sql.query(
             `UPDATE [class]
-                SET  user_code = '' WHERE user_code = '${teacherCode}' AND classId = '${class_id}'`
+                SET  userId = NULL WHERE userId = '${userId}' AND classId = '${class_id}'`
         )
     }
 
@@ -202,19 +226,19 @@ class AdminTeacherQueries {
         `)
     }
     // create assignClass
-    async assignmentClassToTeacher({ userId, user_code, classId, day, start_time }) {
+    async assignmentClassToTeacher({ userId, classId, day, start_time }) {
         return await sql.query(`
-          UPDATE [class]
-        SET userId = ${userId}, user_code = '${user_code}'
-        WHERE
-            lessonId = '${classId}' AND
-            day = N'${day}' AND
-            start_time = N'${start_time}'
-                `)
+            UPDATE [class]
+            SET userId = '${userId}'
+                WHERE
+                    lessonId = '${classId}' AND
+                    day = N'${day}' AND
+                    start_time = N'${start_time}'
+        `)
     }
 
     async getProfile(userId) {
-        return await sql.query(`select * from [user] where code = ${userId}`)
+        return await sql.query(`select * from [user] where userId = ${userId}`)
     }
 }
 
