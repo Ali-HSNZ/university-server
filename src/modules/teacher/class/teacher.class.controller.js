@@ -1,6 +1,7 @@
 const autoBind = require('auto-bind')
 const { TeacherClassMessages } = require('./teacher.class.messages')
 const { TeacherClassService } = require('./teacher.class.service')
+const { unlinkSync } = require('fs')
 
 class TeacherClassController {
     #service
@@ -8,6 +9,33 @@ class TeacherClassController {
     constructor() {
         autoBind(this)
         this.#service = TeacherClassService
+    }
+
+    async assign(req, res, next) {
+        try {
+            const validationErrors = await this.#service.validateBulkCreateExcelFile(req)
+
+            const filePath = req?.file?.path.replace(/\\/g, '/').substring(7)
+            const fileUrl = req.protocol + '://' + req.get('host') + '/' + filePath
+
+            if (validationErrors.length >= 1) {
+                return res.status(400).json({
+                    code: 400,
+                    message: 'خطای اعتبارسنجی',
+                    errors: validationErrors[0],
+                })
+            }
+
+            await this.#service.bulkAssign(req.body, req.user, fileUrl)
+
+            return res.status(200).json({
+                message: 'پس از تایید رئیس دانشگاه، تخصیص کلاس انجام خواهد شد',
+                code: 200,
+            })
+        } catch (error) {
+            unlinkSync(req.file.path)
+            next(error)
+        }
     }
 
     async profile(req, res, next) {
@@ -27,9 +55,9 @@ class TeacherClassController {
 
     async getAll(req, res, next) {
         try {
-            const userCode = req.user.code
+            const userId = req.user.userId
 
-            const result = await this.#service.getAll(userCode)
+            const result = await this.#service.getAll(userId)
 
             res.status(200).json({
                 code: 200,
