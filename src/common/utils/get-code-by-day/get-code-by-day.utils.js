@@ -1,24 +1,24 @@
-const getDayCode = (code) => {
-    let day = ''
+const getDayCode = (day) => {
+    let result = ''
 
-    switch (code) {
+    switch (day) {
         case 'شنبه':
-            day = 0
+            result = 0
             break
         case 'یک‌شنبه':
-            day = 1
+            result = 1
             break
         case 'دوشنبه':
-            day = 2
+            result = 2
             break
         case 'سه‌شنبه':
-            day = 3
+            result = 3
             break
         case 'چهارشنبه':
-            day = 4
+            result = 4
             break
     }
-    return day.toString()
+    return result.toString()
 }
 
 module.exports = getDayCode
