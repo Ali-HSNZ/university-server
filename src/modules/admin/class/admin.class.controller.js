@@ -1,13 +1,27 @@
 const autoBind = require('auto-bind')
 const { AdminClassService } = require('./admin.class.service')
-const { AdminLessonService } = require('../lesson/admin.lesson.service')
 const { AdminClassMessages } = require('./admin.class.messages')
-
+const { unlinkSync } = require('fs')
+const { findFile } = require('../../../common/utils/find-file')
+const createHttpError = require('http-errors')
 class AdminClassController {
     #service
+
     constructor() {
         autoBind(this)
         this.#service = AdminClassService
+    }
+
+    async assignClassByFileName(req, res, next) {
+        try {
+            await this.#service.assignClassByFileName(req.params.fileName, req.params.fileId)
+            res.status(200).json({
+                code: 200,
+                message: AdminClassMessages.AssignClassByFile,
+            })
+        } catch (error) {
+            next(error)
+        }
     }
 
     async lessonsList(req, res, next) {
@@ -64,6 +78,46 @@ class AdminClassController {
         }
     }
 
+    async bulkCreate(req, res, next) {
+        try {
+            const validationErrors = await this.#service.validateBulkCreateExcelFile(req)
+
+            const filePath = req?.file?.path.replace(/\\/g, '/').substring(7)
+            const fileUrl = req.protocol + '://' + req.get('host') + '/' + filePath
+
+            if (validationErrors.length >= 1) {
+                return res.status(400).json({
+                    code: 400,
+                    message: 'خطای اعتبارسنجی',
+                    errors: validationErrors[0],
+                })
+            }
+
+            await this.#service.bulkCreate(req.body, req.user, fileUrl)
+
+            return res.status(200).json({
+                message: AdminClassMessages.BulkCreateSuccessfully,
+                code: 200,
+            })
+        } catch (error) {
+            unlinkSync(req.file.path)
+            next(error)
+        }
+    }
+
+    async allFiles(req, res, next) {
+        try {
+            const result = await this.#service.getAllFiles()
+            res.status(200).json({
+                code: 200,
+                message: AdminClassMessages.LessonsFiles,
+                data: result,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
     async deleteClassById(req, res, next) {
         try {
             const id = req.params.id
@@ -84,6 +138,18 @@ class AdminClassController {
             next(error)
         }
     }
+    async pendingToAgreeList(req, res, next) {
+        try {
+            const result = await this.#service.getPendingToAgreeList()
+            res.status(200).json({
+                code: 200,
+                message: AdminClassMessages.PendingToAgreeList,
+                data: result,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
     async getAll(req, res, next) {
         try {
@@ -93,6 +159,27 @@ class AdminClassController {
                 code: 200,
                 message: AdminClassMessages.ClassList,
                 data: result,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async deleteFile(req, res, next) {
+        try {
+            const { fileId, fileName } = req.params
+            const filePath = findFile(fileName)
+
+            const result = await this.#service.deleteFileByFileId(fileId)
+            if (result.rowsAffected.length === 0) {
+                throw new createHttpError.NotFound('خطا در فرایند حذف فایل')
+            }
+
+            unlinkSync(filePath)
+
+            res.status(200).json({
+                code: 200,
+                message: AdminClassMessages.DeleteFileSuccessfully,
             })
         } catch (error) {
             next(error)

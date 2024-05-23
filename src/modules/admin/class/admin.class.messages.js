@@ -6,6 +6,11 @@ const AdminClassMessages = {
     ClassList: 'لیست کلاس ها',
     ClassDeletedSuccessfully: 'حذف کلاس با موفقیت انجام شد',
     ClassDeletedFailed: 'فرایند حذف کلاس با خطا مواجه شد',
+    LessonsFiles: 'لیست فایل ها',
+    DeleteFileSuccessfully: 'حذف فایل با موفقیت انجام شد',
+    PendingToAgreeList: 'لیست فایل های در انتظار تایید',
+    BulkCreateSuccessfully: 'کلاس ها با موفقیت ثبت شده اند',
+    AssignClassByFile: 'فرایند تخصیص کلاس با موفقیت انجام شد',
 }
 
 module.exports = { AdminClassMessages }
