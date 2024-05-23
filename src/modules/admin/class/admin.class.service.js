@@ -53,9 +53,11 @@ class AdminClassService {
         }
         await this.createClassFile(user, fileUrl)
     }
+
     async deleteFileByFileId(fileId) {
         return await this.#queries.deleteFileByFileId(fileId)
     }
+
     async assignClassByFileName(fileName, fileId) {
         const file = findFile(fileName)
 
@@ -189,14 +191,17 @@ class AdminClassService {
             value: item.value.toString(),
         }))
     }
+
     async getAllFiles() {
         const result = await this.#queries.getAllFiles()
         return result.recordset
     }
+
     async getPendingToAgreeList() {
         const result = await this.#queries.getPendingToAgreeList()
         return result.recordset
     }
+
     async checkExistLesson({ lesson_id, start_time, day }) {
         const result = await this.#queries.checkExistLesson({ lesson_id, start_time, day })
         return result.recordset

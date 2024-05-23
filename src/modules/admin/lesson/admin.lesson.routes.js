@@ -15,6 +15,8 @@ router.post(
 )
 router.get('/files/list', AdminLessonController.allFiles)
 
+router.delete('/file/:fileName/delete/:fileId', AdminLessonController.deleteFile)
+
 router.get('/list', AdminLessonController.list)
 router.delete('/:id/delete', AdminLessonController.delete)
 

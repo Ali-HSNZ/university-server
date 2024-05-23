@@ -50,6 +50,10 @@ class AdminLessonService {
         return false
     }
 
+    async deleteFileByFileId(fileId) {
+        return await this.#queries.deleteFileByFileId(fileId)
+    }
+
     async createLessonFile(user, fileUrl) {
         const currentDate = new Date()
 
@@ -66,6 +70,7 @@ class AdminLessonService {
             file_path: fileUrl,
             is_show: 1,
             date: createFileDate,
+            userId: user.userId,
         })
     }
 
@@ -127,7 +132,13 @@ class AdminLessonService {
         return validationErrors
     }
     async deleteLessonById(code) {
-        return await this.#queries.deleteLessonByCode(code)
+        const result = await this.#queries.getLessonTitleByLessonCode(code)
+        if (result.recordset.length === 0) {
+            throw new createHttpError.NotFound('درس یافت نشد')
+        }
+        const lesson_title = result.recordset[0].title
+
+        return await this.#queries.deleteLessonByCode(code, lesson_title)
     }
 
     async getAll() {

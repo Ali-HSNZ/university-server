@@ -1,6 +1,9 @@
 const autoBind = require('auto-bind')
 const { AdminLessonService } = require('./admin.lesson.service')
 const { AdminLessonMessages } = require('./admin.lesson.messages')
+const { unlinkSync } = require('fs')
+const { findFile } = require('../../../common/utils/find-file')
+const createHttpError = require('http-errors')
 
 class AdminLessonController {
     #service
@@ -29,6 +32,7 @@ class AdminLessonController {
                 code: 200,
             })
         } catch (error) {
+            unlinkSync(req.file.path)
             next(error)
         }
     }
@@ -81,13 +85,35 @@ class AdminLessonController {
             next(error)
         }
     }
+
+    async deleteFile(req, res, next) {
+        try {
+            const { fileId, fileName } = req.params
+            const filePath = findFile(fileName)
+
+            const result = await this.#service.deleteFileByFileId(fileId)
+            if (result.rowsAffected.length === 0) {
+                throw new createHttpError.NotFound('خطا در فرایند حذف فایل')
+            }
+
+            unlinkSync(filePath)
+
+            res.status(200).json({
+                code: 200,
+                message: AdminLessonMessages.DeleteFileSuccessfully,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
     async delete(req, res, next) {
         try {
             const id = req.params.id
 
             const result = await this.#service.deleteLessonById(id)
 
-            if (result.rowsAffected[0] >= 1)
+            if (result.rowsAffected.length >= 1)
                 return res.status(200).json({
                     code: 200,
                     message: AdminLessonMessages.DeleteLessonSuccessfully,
