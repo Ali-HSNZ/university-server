@@ -13,7 +13,10 @@ class AuthService {
     }
     async login(national_code, pass) {
         const user = await this.isExistUser(national_code, pass)
-        const token = this.signToken({ national_code })
+        const token = this.signToken({
+            national_code,
+            userType: user.type === 1 ? 'admin/teachers' : 'user',
+        })
         return { user, token }
     }
     async isExistUser(national_code, pass) {
