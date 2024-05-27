@@ -14,14 +14,16 @@ class AuthController {
         try {
             const { national_code, pass } = req.body
 
-            const { user, token } = await this.#service.login(national_code, pass)
+            const { user_type, token } = await this.#service.login(national_code, pass)
+
+            console.log({ user_type, token })
 
             return res.status(200).json({
                 message: AuthMessage.LoginSuccessfully,
                 code: 200,
                 data: {
                     token: token,
-                    userType: !user.type || user.type === 0 ? 'teacher' : 'admin',
+                    userType: !user_type || user_type === 0 ? 'teacher' : 'admin',
                 },
             })
         } catch (error) {

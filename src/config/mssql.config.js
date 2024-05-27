@@ -2,7 +2,7 @@
 module.exports = {
     user: '',
     password: '',
-    database: 'university',
+    database: 'Test',
     server: 'DESKTOP-DDE6KEQ\\SA',
     driver: 'msnodesqlv8',
     options: {
