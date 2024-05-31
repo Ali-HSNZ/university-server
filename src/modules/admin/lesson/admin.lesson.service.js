@@ -77,11 +77,15 @@ class AdminLessonService {
     async bulkCreate(lessonsList, user, fileUrl) {
         const lessonsDTO = this.convertExcelToValidData(lessonsList)
 
+        // check lesson not exist
         for (const lesson of lessonsDTO) {
             const isExistLesson = await this.checkExistLessonByTitle(lesson.title)
             if (isExistLesson && isExistLesson['title']) {
                 throw new createHttpError.BadRequest('عنوان درس تکراری است')
             }
+        }
+
+        for (const lesson of lessonsDTO) {
             await this.create({
                 title: lesson.title,
                 type: lesson.type,

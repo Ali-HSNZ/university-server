@@ -131,7 +131,7 @@ class AdminTeacherController {
             const teacherCode = req.params.teacherCode
             const result = await this.#service.deleteTeacherByCode(teacherCode)
 
-            if (result.rowsAffected[0] >= 1)
+            if (result.rowsAffected.length >= 1)
                 return res.status(200).json({
                     code: 200,
                     message: AdminTeacherMessages.DeleteTeacherSuccessfully,

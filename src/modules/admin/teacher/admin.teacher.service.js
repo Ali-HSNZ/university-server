@@ -85,6 +85,7 @@ class AdminTeacherService {
     async bulkCreate(usersList, user, fileUrl) {
         const usersDTO = this.convertExcelToValidData(usersList)
 
+        // check user not exist
         for (const user of usersDTO) {
             const isExistTeacher = await this.checkExistUser(user.national_code, user.mobile)
             if (isExistTeacher) {
@@ -92,6 +93,9 @@ class AdminTeacherService {
                     throw new createHttpError.BadRequest('کد ملی تکراری است')
                 else throw new createHttpError.BadRequest('شماره موبایل تکراری است')
             }
+        }
+
+        for (const user of usersDTO) {
             await this.create({
                 first_name: user.first_name,
                 last_name: user.last_name,

@@ -22,6 +22,7 @@ class AdminClassService {
     async bulkCreate(classesList, user, fileUrl) {
         const classesDTO = this.convertExcelToValidData(classesList)
 
+        // check each class
         for (const lesson of classesDTO) {
             const lesson_id = await this.getLessonIdByTitle(lesson.title)
             const { day, start_time } = lesson
@@ -40,12 +41,17 @@ class AdminClassService {
                 const errorMessage = `درس ${lesson.title} در ساعت ${start_time} در روز ${day} تشکیل می‌شود`
                 throw new createHttpError(errorMessage)
             }
+        }
+
+        // inject lessons
+        for (const lesson of classesDTO) {
+            const lesson_id = await this.getLessonIdByTitle(lesson.title)
 
             await this.create({
                 title: lesson.title,
-                start_time: replaceNumbersWithPersianUtils(start_time),
+                start_time: replaceNumbersWithPersianUtils(lesson.start_time),
                 end_time: replaceNumbersWithPersianUtils(lesson.end_time),
-                day,
+                day: lesson.day,
                 test_date: replaceNumbersWithPersianUtils(lesson.test_date),
                 test_time: replaceNumbersWithPersianUtils(lesson.test_time),
                 lesson_id,
