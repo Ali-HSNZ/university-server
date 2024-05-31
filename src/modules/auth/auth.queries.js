@@ -7,25 +7,20 @@ class AuthQueries {
         autoBind(this)
     }
 
-    async queryDB(query) {
-        let pool = await sql.connect(mssqlConfig)
-
-        const result = await pool.request().query(query)
-        await sql.close()
-
-        return result
+    async connectDB() {
+        sql.connect(mssqlConfig).catch((err) => err)
     }
 
     async findUserQuery(national_code, pass) {
-        return await this.queryDB(
+        return await sql.query(
             `select * from [user] where national_code = ${national_code} and pass = '${pass}'`
         )
     }
     async checkIsFirstUser() {
-        return await this.queryDB(`select * from [user] `)
+        return await sql.query(`select * from [user] `)
     }
     async createFirstUser(national_code, pass) {
-        return await this.queryDB(
+        return await sql.query(
             `insert into [user] (
                 national_code,
                 pass,
@@ -38,7 +33,7 @@ class AuthQueries {
         )
     }
     async signUserToken(token, national_code) {
-        return await this.queryDB(
+        return await sql.query(
             `update [user] set token = '${token}' where national_code = ${national_code} `
         )
     }

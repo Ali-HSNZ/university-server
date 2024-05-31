@@ -16,13 +16,11 @@ class AuthController {
 
             const { user_type, token } = await this.#service.login(national_code, pass)
 
-            console.log({ user_type, token })
-
             return res.status(200).json({
                 message: AuthMessage.LoginSuccessfully,
                 code: 200,
                 data: {
-                    token: token,
+                    token,
                     userType: !user_type || user_type === 0 ? 'teacher' : 'admin',
                 },
             })
