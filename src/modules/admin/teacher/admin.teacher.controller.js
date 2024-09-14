@@ -1,7 +1,6 @@
 const autoBind = require('auto-bind')
 const { adminTeacherService } = require('./admin.teacher.service')
 const { AdminTeacherMessages } = require('./admin.teacher.messages')
-const { adminCreateTeacherExcelValidator } = require('./admin.teacher.validation')
 const { unlinkSync } = require('fs')
 const createHttpError = require('http-errors')
 const { findFile } = require('../../../common/utils/find-file')
@@ -252,6 +251,9 @@ class AdminTeacherController {
             const fileUrl = req.protocol + '://' + req.get('host') + '/' + filePath
 
             if (validationErrors.length >= 1) {
+                // remove excel file from server
+                unlinkSync(req.file.path)
+
                 return res.status(400).json({
                     code: 400,
                     message: 'خطای اعتبارسنجی',

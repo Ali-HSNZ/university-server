@@ -19,16 +19,19 @@ class AdminLessonController {
             const fileUrl = req.protocol + '://' + req.get('host') + '/' + filePath
 
             if (validationErrors.length >= 1) {
+                // remove excel file from server
+                unlinkSync(req.file.path)
+
                 return res.status(400).json({
                     code: 400,
-                    message: 'خطای اعتبارسنجی',
+                    message: AdminLessonMessages.ValidationError,
                     errors: validationErrors[0],
                 })
             }
             await this.#service.bulkCreate(req.body, req.user, fileUrl)
 
             return res.status(200).json({
-                message: 'دروس با موفقیت ثبت شده اند',
+                message: AdminLessonMessages.CreateLessonSuccessfully,
                 code: 200,
             })
         } catch (error) {
@@ -93,7 +96,7 @@ class AdminLessonController {
 
             const result = await this.#service.deleteFileByFileId(fileId)
             if (result.rowsAffected.length === 0) {
-                throw new createHttpError.NotFound('خطا در فرایند حذف فایل')
+                throw new createHttpError.InternalServerError(AdminLessonMessages.DeleteFileFailed)
             }
 
             unlinkSync(filePath)

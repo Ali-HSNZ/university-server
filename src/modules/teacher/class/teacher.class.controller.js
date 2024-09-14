@@ -19,9 +19,12 @@ class TeacherClassController {
             const fileUrl = req.protocol + '://' + req.get('host') + '/' + filePath
 
             if (validationErrors.length >= 1) {
+                // remove excel file from server
+                unlinkSync(req.file.path)
+
                 return res.status(400).json({
                     code: 400,
-                    message: 'خطای اعتبارسنجی',
+                    message: TeacherClassMessages.ValidationError,
                     errors: validationErrors[0],
                 })
             }
@@ -29,7 +32,7 @@ class TeacherClassController {
             await this.#service.bulkAssign(req.body, req.user, fileUrl)
 
             return res.status(200).json({
-                message: 'پس از تایید رئیس دانشگاه، تخصیص کلاس انجام خواهد شد',
+                message: TeacherClassMessages.AssignRequestSuccessfully,
                 code: 200,
             })
         } catch (error) {

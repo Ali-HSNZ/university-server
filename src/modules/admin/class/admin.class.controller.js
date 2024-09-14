@@ -86,6 +86,9 @@ class AdminClassController {
             const fileUrl = req.protocol + '://' + req.get('host') + '/' + filePath
 
             if (validationErrors.length >= 1) {
+                // remove excel file from server
+                unlinkSync(req.file.path)
+
                 return res.status(400).json({
                     code: 400,
                     message: 'خطای اعتبارسنجی',
