@@ -11,6 +11,10 @@ const AdminClassMessages = {
     PendingToAgreeList: 'لیست فایل های در انتظار تایید',
     BulkCreateSuccessfully: 'کلاس ها با موفقیت ثبت شده اند',
     AssignClassByFile: 'فرایند تخصیص کلاس با موفقیت انجام شد',
+    DeleteFileFailed: 'خطا در فرایند حذف فایل',
+    ValidationError: 'خطای اعتبارسنجی',
+    UserNotFound: 'کاربر یافت نشد',
+    ClassNotFound: 'کلاس یافت نشد',
 }
 
 module.exports = { AdminClassMessages }

@@ -17,6 +17,10 @@ const AdminTeacherMessages = {
     TeacherAssignSuccessfully: 'تخصیص کلاس با موفقیت انجام شد',
     TeacherNotFound: 'استاد یافت نشد',
     DeleteFileSuccessfully: 'حذف فایل با موفقیت انجام شد',
+    DeleteFileFailed: 'خطا در فرایند حذف فایل',
+    ValidationError: 'خطای اعتبارسنجی',
+    ExistNationalCode: 'کدملی تکراری است',
+    ExistMobile: 'شماره موبایل تکراری است',
 }
 
 module.exports = { AdminTeacherMessages }

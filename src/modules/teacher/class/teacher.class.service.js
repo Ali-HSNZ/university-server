@@ -121,7 +121,7 @@ class TeacherClassService {
             })
 
             if (assignedClass.recordset.length === 0) {
-                throw new createHttpError('کلاس مورد نظر توسط استاد دیگری انتخاب شده است')
+                throw new createHttpError(TeacherClassMessages.AssignClassExist)
             }
         }
         await this.createClassFile(user, fileUrl)

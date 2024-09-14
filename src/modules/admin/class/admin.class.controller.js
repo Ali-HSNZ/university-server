@@ -4,6 +4,7 @@ const { AdminClassMessages } = require('./admin.class.messages')
 const { unlinkSync } = require('fs')
 const { findFile } = require('../../../common/utils/find-file')
 const createHttpError = require('http-errors')
+
 class AdminClassController {
     #service
 
@@ -91,7 +92,7 @@ class AdminClassController {
 
                 return res.status(400).json({
                     code: 400,
-                    message: 'خطای اعتبارسنجی',
+                    message: AdminClassMessages.ValidationError,
                     errors: validationErrors[0],
                 })
             }
@@ -175,7 +176,7 @@ class AdminClassController {
 
             const result = await this.#service.deleteFileByFileId(fileId)
             if (result.rowsAffected.length === 0) {
-                throw new createHttpError.NotFound('خطا در فرایند حذف فایل')
+                throw new createHttpError.NotFound(AdminClassMessages.DeleteFileFailed)
             }
 
             unlinkSync(filePath)

@@ -9,6 +9,7 @@ const { replaceNumbersWithPersian } = require('../../../common/utils/replace-num
 const replaceNumbersWithPersianUtils = require('../../../common/utils/replace-numbers-with-persian/replace-numbers-with-persian.utils')
 const autoBind = require('auto-bind')
 const { findFile } = require('../../../common/utils/find-file')
+const { AdminClassMessages } = require('./admin.class.messages')
 
 class AdminClassService {
     #queries
@@ -28,7 +29,7 @@ class AdminClassService {
             const { day, start_time } = lesson
 
             if (!lesson_id) {
-                throw new createHttpError.BadRequest('عنوان درس یافت نشد')
+                throw new createHttpError.BadRequest(AdminClassMessages.LessonNotAvailable)
             }
 
             const availableLesson = await this.checkExistLesson({
@@ -76,7 +77,7 @@ class AdminClassService {
 
         const availableUser = await this.#queries.getUserByFileId(fileId)
         if (availableUser.recordset.length === 0) {
-            throw new createHttpError.NotFound('کاربر یافت نشد')
+            throw new createHttpError.NotFound(AdminClassMessages.UserNotFound)
         }
         const user = availableUser.recordset[0]
 
@@ -91,7 +92,7 @@ class AdminClassService {
             })
 
             if (availableClass.length === 0) {
-                throw new createHttpError.NotFound('کلاس یافت نشد')
+                throw new createHttpError.NotFound(AdminClassMessages.ClassNotFound)
             }
 
             await this.#teacherService.assignmentClassToTeacher({

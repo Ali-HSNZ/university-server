@@ -90,8 +90,8 @@ class AdminTeacherService {
             const isExistTeacher = await this.checkExistUser(user.national_code, user.mobile)
             if (isExistTeacher) {
                 if (isExistTeacher['national_code'])
-                    throw new createHttpError.BadRequest('کد ملی تکراری است')
-                else throw new createHttpError.BadRequest('شماره موبایل تکراری است')
+                    throw new createHttpError.BadRequest(AdminTeacherMessages.ExistNationalCode)
+                else throw new createHttpError.BadRequest(AdminTeacherMessages.ExistMobile)
             }
         }
 

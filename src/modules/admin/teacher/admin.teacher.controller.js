@@ -229,7 +229,7 @@ class AdminTeacherController {
 
             const result = await this.#service.deleteFileByFileId(fileId)
             if (result.rowsAffected.length === 0) {
-                throw new createHttpError.NotFound('خطا در فرایند حذف فایل')
+                throw new createHttpError.NotFound(AdminTeacherMessages.DeleteFileFailed)
             }
 
             unlinkSync(filePath)
@@ -256,7 +256,7 @@ class AdminTeacherController {
 
                 return res.status(400).json({
                     code: 400,
-                    message: 'خطای اعتبارسنجی',
+                    message: AdminTeacherMessages.ValidationError,
                     errors: validationErrors[0],
                 })
             }
@@ -264,7 +264,7 @@ class AdminTeacherController {
             await this.#service.bulkCreate(req.body, req.user, fileUrl)
 
             return res.status(200).json({
-                message: 'اساتید با موفقیت ثبت شده اند',
+                message: AdminTeacherMessages.CreateTeacherSuccessfully,
                 code: 200,
             })
         } catch (error) {

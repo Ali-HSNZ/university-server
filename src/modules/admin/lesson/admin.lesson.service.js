@@ -1,7 +1,6 @@
 const createHttpError = require('http-errors')
 const { generateUniqueCode } = require('../../../common/utils/generate-unique-code')
 const { mapLabelsToValues } = require('../../../common/utils/map-labels-to-values')
-const { adminCreateTeacherExcelValidator } = require('../teacher/admin.teacher.validation')
 const { AdminLessonMessages } = require('./admin.lesson.messages')
 const { AdminLessonQueries } = require('./admin.lesson.queries')
 const { adminCreateLessonExcelValidator } = require('./admin.lesson.validation')
@@ -81,7 +80,7 @@ class AdminLessonService {
         for (const lesson of lessonsDTO) {
             const isExistLesson = await this.checkExistLessonByTitle(lesson.title)
             if (isExistLesson && isExistLesson['title']) {
-                throw new createHttpError.BadRequest('عنوان درس تکراری است')
+                throw new createHttpError.BadRequest(AdminLessonMessages.ExistLessonTitle)
             }
         }
 
@@ -138,7 +137,7 @@ class AdminLessonService {
     async deleteLessonById(code) {
         const result = await this.#queries.getLessonTitleByLessonCode(code)
         if (result.recordset.length === 0) {
-            throw new createHttpError.NotFound('درس یافت نشد')
+            throw new createHttpError.NotFound(AdminLessonMessages.NotFound)
         }
         const lesson_title = result.recordset[0].title
 
